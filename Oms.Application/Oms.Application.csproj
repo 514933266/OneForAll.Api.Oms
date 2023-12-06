@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>7.1</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="OneForAll.Core" Version="1.2.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Oms.Domain\Oms.Domain.csproj" />
+    <ProjectReference Include="..\Oms.HttpService\Oms.HttpService.csproj" />
+    <ProjectReference Include="..\Oms.Public\Oms.Public.csproj" />
+    <ProjectReference Include="..\Oms.Repository\Oms.Repository.csproj" />
+  </ItemGroup>
+
+</Project>
