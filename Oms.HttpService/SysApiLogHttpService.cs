@@ -32,12 +32,14 @@ namespace Oms.HttpService
         /// </summary>
         /// <param name="form">实体</param>
         /// <returns></returns>
-        public async Task AddAsync(SysApiLogForm form)
+        public async Task AddAsync(SysApiLogRequest form)
         {
-            form.CreatorId = LoginUser.Id;
-            form.CreatorName = LoginUser.Name;
-            form.TenantId = LoginUser.SysTenantId;
-            form.CreateTime = DateTime.Now;
+            if (LoginUser.Id != Guid.Empty)
+            {
+                form.CreatorId = LoginUser.Id;
+                form.CreatorName = LoginUser.Name;
+                form.TenantId = LoginUser.SysTenantId;
+            }
 
             var client = GetHttpClient(_config.SysApiLog);
             if (client != null && client.BaseAddress != null)

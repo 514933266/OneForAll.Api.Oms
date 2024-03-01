@@ -44,5 +44,16 @@ namespace Oms.HttpService.Models
         /// 微信JSAPI下单
         /// </summary>
         public string WxJSAPIOrder { get; set; } = "WxJSAPIOrder";
+
+        /// <summary>
+        /// 微信小程序下单
+        /// </summary>
+        public string WxmpOrder { get; set; } = "WxmpOrder";
+
+        /// <summary>
+        /// 定时任务调度中心
+        /// </summary>
+        public string ScheduleJob { get; set; } = "ScheduleJob";
+        
     }
 }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using OneForAll.Core.Extension;
 using Oms.Public.Models;
+using OneForAll.Core.OAuth;
 
 namespace Oms.HttpService
 {
@@ -44,77 +45,26 @@ namespace Oms.HttpService
             }
         }
 
-        protected Guid UserId
-        {
-            get
-            {
-                var userId = _httpContext.HttpContext
-                .User
-                .Claims
-                .FirstOrDefault(e => e.Type == UserClaimType.USER_ID);
-
-                if (userId != null)
-                {
-                    return new Guid(userId.Value);
-                }
-                return Guid.Empty;
-            }
-        }
-
-        protected string UserName
-        {
-            get
-            {
-                var username = _httpContext.HttpContext
-                .User
-                .Claims
-                .FirstOrDefault(e => e.Type == UserClaimType.USERNAME);
-
-                if (username != null)
-                {
-                    return username.Value;
-                }
-                return null;
-            }
-        }
-
-        protected Guid SysTenantId
-        {
-            get
-            {
-                var tenantId = _httpContext.HttpContext
-                .User
-                .Claims
-                .FirstOrDefault(e => e.Type == UserClaimType.TENANT_ID);
-
-                if (tenantId != null)
-                {
-                    return new Guid(tenantId.Value);
-                }
-                return Guid.Empty;
-            }
-        }
-
         protected LoginUser LoginUser
         {
             get
             {
-                var name = _httpContext.HttpContext
-                .User
-                .Claims
-                .FirstOrDefault(e => e.Type == UserClaimType.USER_NICKNAME);
-
-                var role = _httpContext.HttpContext
-                .User
-                .Claims
-                .FirstOrDefault(e => e.Type == UserClaimType.ROLE);
-
-                return new LoginUser()
+                var claims = _httpContext.HttpContext.User.Claims;
+                if (claims.Any())
                 {
-                    Id = UserId,
-                    Name = name?.Value,
-                    SysTenantId = SysTenantId
-                };
+                    return new LoginUser()
+                    {
+                        Name = claims.FirstOrDefault(e => e.Type == UserClaimType.USER_NICKNAME)?.Value ?? "",
+                        UserName = claims.FirstOrDefault(e => e.Type == UserClaimType.USERNAME)?.Value ?? "",
+                        WxAppId = claims.FirstOrDefault(e => e.Type == UserClaimType.WX_APPID)?.Value ?? "",
+                        WxOpenId = claims.FirstOrDefault(e => e.Type == UserClaimType.WX_OPENID)?.Value ?? "",
+                        WxUnionId = claims.FirstOrDefault(e => e.Type == UserClaimType.WX_UNIONID)?.Value ?? "",
+                        Id = claims.FirstOrDefault(e => e.Type == UserClaimType.USER_ID).Value.TryGuid(),
+                        SysTenantId = claims.FirstOrDefault(e => e.Type == UserClaimType.TENANT_ID).Value.TryGuid(),
+                        IsDefault = claims.FirstOrDefault(e => e.Type == UserClaimType.IS_DEFAULT).Value.TryBoolean()
+                    };
+                }
+                return new LoginUser();
             }
         }
 
@@ -131,6 +81,16 @@ namespace Oms.HttpService
                 client.DefaultRequestHeaders.Add(AUTH_KEY, Token);
             }
             return client;
+        }
+
+        /// <summary>
+        /// 获取HttpClient，不带token请求头
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        protected HttpClient GetHttpClientWithNoToken(string name)
+        {
+            return _httpClientFactory.CreateClient(name);
         }
     }
 }

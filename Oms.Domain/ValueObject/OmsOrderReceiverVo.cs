@@ -17,14 +17,14 @@ namespace Oms.Domain.ValueObject
         /// </summary>
         [Required]
         [StringLength(20)]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
 
         /// <summary>
         /// 电话
         /// </summary>
         [Required]
         [StringLength(20)]
-        public string PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; } = "";
 
         /// <summary>
         /// 收货地址
@@ -43,27 +43,27 @@ namespace Oms.Domain.ValueObject
         /// </summary>
         [Required]
         [StringLength(10)]
-        public string Province { get; set; }
+        public string Province { get; set; } = "";
 
         /// <summary>
         /// 城市
         /// </summary>
         [Required]
         [StringLength(10)]
-        public string City { get; set; }
+        public string City { get; set; } = "";
 
         /// <summary>
         /// 区县
         /// </summary>
         [Required]
         [StringLength(10)]
-        public string District { get; set; }
+        public string District { get; set; } = "";
 
         /// <summary>
         /// 详细地址
         /// </summary>
         [Required]
         [StringLength(500)]
-        public string Address { get; set; }
+        public string Address { get; set; } = "";
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
 using Oms.Public.Models;
+using OneForAll.Core.OAuth;
 
 namespace Oms.Host
 {
@@ -17,7 +18,7 @@ namespace Oms.Host
 
         public Guid GetTenantId()
         {
-            var tenantId = _context.HttpContext.User.Claims.FirstOrDefault(e => e.Type == UserClaimType.TENANT_ID);
+            var tenantId = _context.HttpContext?.User.Claims.FirstOrDefault(e => e.Type == UserClaimType.TENANT_ID);
             if (tenantId != null)
             {
                 return new Guid(tenantId.Value);

@@ -19,7 +19,7 @@ namespace Oms.Domain.ValueObject
         /// </summary>
         [Required]
         [StringLength(50)]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
 
         /// <summary>
         /// 金额
@@ -33,6 +33,6 @@ namespace Oms.Domain.ValueObject
         /// </summary>
         [Required]
         [StringLength(200)]
-        public string Remark { get; set; }
+        public string Remark { get; set; } = "";
     }
 }

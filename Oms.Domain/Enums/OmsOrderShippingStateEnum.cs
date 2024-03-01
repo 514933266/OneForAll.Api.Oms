@@ -12,11 +12,6 @@ namespace Oms.Domain.Enums
     public enum OmsOrderShippingStateEnum
     {
         /// <summary>
-        /// 无
-        /// </summary>
-        None = -1,
-
-        /// <summary>
         /// 待发货
         /// </summary>
         Pending = 0,
@@ -34,6 +29,6 @@ namespace Oms.Domain.Enums
         /// <summary>
         /// 已退货
         /// </summary>
-        Returned = 3
+        Returned = 99
     }
 }

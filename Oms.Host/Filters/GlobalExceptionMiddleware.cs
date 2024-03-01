@@ -4,6 +4,7 @@ using System;
 using Oms.Host.Models;
 using Oms.HttpService.Interfaces;
 using Oms.HttpService.Models;
+using Oms.Public.Models;
 
 namespace Oms.Host.Filters
 {

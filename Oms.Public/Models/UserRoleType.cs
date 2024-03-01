@@ -17,7 +17,7 @@ namespace Oms.Public.Models
         /// <summary>
         /// 系统使用者
         /// </summary>
-        public const string ADMIN = "ruler,admin";
+        public const string ADMIN = "ruler,admin,patient,doctor";
 
         /// <summary>
         /// 公共

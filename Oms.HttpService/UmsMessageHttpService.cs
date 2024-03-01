@@ -35,7 +35,7 @@ namespace Oms.HttpService
         /// </summary>
         /// <param name="form">表单</param>
         /// <returns></returns>
-        public async Task<BaseMessage> SendAsync(UmsMessageForm form)
+        public async Task<BaseMessage> SendAsync(UmsMessageRequest form)
         {
             var client = GetHttpClient(_config.UmsMessage);
             if (client != null)

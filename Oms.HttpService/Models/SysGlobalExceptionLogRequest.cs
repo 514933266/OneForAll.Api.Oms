@@ -43,6 +43,6 @@ namespace Oms.HttpService.Models
         /// 创建时间
         /// </summary>
         [Required]
-        public DateTime CreateTime { get; set; }
+        public DateTime CreateTime { get; set; } = DateTime.Now;
     }
 }

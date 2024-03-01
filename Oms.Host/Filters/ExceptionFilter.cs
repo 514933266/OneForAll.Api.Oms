@@ -10,6 +10,7 @@ using OneForAll.Core.Extension;
 using Oms.Host.Models;
 using Oms.HttpService.Interfaces;
 using Oms.HttpService.Models;
+using Oms.Public.Models;
 
 namespace Oms.Host.Filters
 {
@@ -46,7 +47,7 @@ namespace Oms.Host.Filters
                 #region 记录日志
                 var controller = context.ActionDescriptor.RouteValues["controller"];
                 var action = context.ActionDescriptor.RouteValues["action"];
-                _httpService.AddAsync(new SysExceptionLogForm()
+                _httpService.AddAsync(new SysExceptionLogRequest()
                 {
                     MoudleName = _authConfig.ClientName,
                     MoudleCode = _authConfig.ClientCode,

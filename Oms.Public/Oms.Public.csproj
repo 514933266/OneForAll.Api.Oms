@@ -1,7 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OneForAll.Core" Version="2.0.2" />
+    <PackageReference Include="OneForAll.File" Version="2.0.1" />
+  </ItemGroup>
 
 </Project>

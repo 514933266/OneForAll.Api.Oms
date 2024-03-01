@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Oms.Domain.ValueObject;
 
 namespace Oms.Application.Dtos
 {
@@ -20,7 +21,12 @@ namespace Oms.Application.Dtos
         /// <summary>
         /// 订单编号
         /// </summary>
-        public string Code { get; set; }
+        public string OrderNo { get; set; }
+
+        /// <summary>
+        /// 第三方订单编号（微信/支付宝/其他）
+        /// </summary>
+        public string PlatformOrderNo { get; set; }
 
         /// <summary>
         /// 订单来源
@@ -28,9 +34,25 @@ namespace Oms.Application.Dtos
         public string Source { get; set; }
 
         /// <summary>
+        /// 购买用户id
+        /// </summary>
+
+        public string UserId { get; set; }
+
+        /// <summary>
         /// 购买账号
         /// </summary>
         public string UserName { get; set; }
+
+        /// <summary>
+        /// 支付平台的用户id
+        /// </summary>
+        public string PlatformPayerId { get; set; }
+
+        /// <summary>
+        /// 商品名称
+        /// </summary>
+        public string ProductName { get; set; }
 
         /// <summary>
         /// 订单状态
@@ -58,6 +80,11 @@ namespace Oms.Application.Dtos
         public decimal PaidAmount { get; set; }
 
         /// <summary>
+        /// CNY：人民币，境内商户号仅支持人民币
+        /// </summary>
+        public string Currency { get; set; }
+
+        /// <summary>
         /// 折扣
         /// </summary>
         public decimal Discount { get; set; }
@@ -70,7 +97,7 @@ namespace Oms.Application.Dtos
         /// <summary>
         /// 支付方式
         /// </summary>
-        public string PayType { get; set; } = "";
+        public string PayType { get; set; }
 
         /// <summary>
         /// 支付时间
@@ -90,12 +117,12 @@ namespace Oms.Application.Dtos
         /// <summary>
         /// 收货人信息Json
         /// </summary>
-        public string ReceiverJson { get; set; }
+        public OmsOrderReceiverVo Receiver { get; set; }
 
         /// <summary>
         /// 其他费用明细
         /// </summary>
-        public string OtherPriceJson { get; set; }
+        public List<OmsOrderOtherPriceVo> OtherPrices { get; set; } = new List<OmsOrderOtherPriceVo>();
 
         /// <summary>
         /// 已开发票
@@ -105,7 +132,7 @@ namespace Oms.Application.Dtos
         /// <summary>
         /// 下单时间
         /// </summary>
-        public DateTime CreateTime { get; set; } = DateTime.Now;
+        public DateTime CreateTime { get; set; }
 
         /// <summary>
         /// 最后修改时间
@@ -113,8 +140,18 @@ namespace Oms.Application.Dtos
         public DateTime? UpdateTime { get; set; }
 
         /// <summary>
+        /// 预计失效时间
+        /// </summary>
+        public DateTime? MayFailureTime { get; set; }
+
+        /// <summary>
         /// 订单备注
         /// </summary>
-        public string Remark { get; set; } = "";
+        public string Remark { get; set; }
+
+        /// <summary>
+        /// 订单明细
+        /// </summary>
+        public List<OmsOrderItemDto> Items { get; set; } = new List<OmsOrderItemDto>();
     }
 }

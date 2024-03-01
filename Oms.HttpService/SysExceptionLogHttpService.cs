@@ -31,7 +31,7 @@ namespace Oms.HttpService
         /// </summary>
         /// <param name="form">实体</param>
         /// <returns></returns>
-        public async Task AddAsync(SysExceptionLogForm form)
+        public async Task AddAsync(SysExceptionLogRequest form)
         {
             form.CreatorId = LoginUser.Id;
             form.CreatorName = LoginUser.Name;
@@ -41,7 +41,8 @@ namespace Oms.HttpService
             var client = GetHttpClient(_config.SysExceptionLog);
             if (client != null && client.BaseAddress != null)
             {
-                await client.PostAsync(client.BaseAddress, form, new JsonMediaTypeFormatter());
+                var response = await client.PostAsync(client.BaseAddress, form, new JsonMediaTypeFormatter());
+                var str = await response.Content.ReadAsStringAsync();
             }
         }
     }

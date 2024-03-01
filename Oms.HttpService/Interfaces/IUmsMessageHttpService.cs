@@ -18,6 +18,6 @@ namespace Oms.HttpService.Interfaces
         /// </summary>
         /// <param name="form">表单</param>
         /// <returns></returns>
-        Task<BaseMessage> SendAsync(UmsMessageForm form);
+        Task<BaseMessage> SendAsync(UmsMessageRequest form);
     }
 }

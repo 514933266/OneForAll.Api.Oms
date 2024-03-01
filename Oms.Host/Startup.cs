@@ -30,17 +30,25 @@ using OneForAll.File;
 using Oms.Host.Hubs;
 using Oms.HttpService.Models;
 using Oms.Public.Models;
+using Quartz.Impl;
+using Quartz.Spi;
+using Quartz;
+using Oms.Host.Providers;
+using Oms.Host.QuartzJobs;
+using OneForAll.Core.Utility;
+using NPOI.SS.Formula.Functions;
 
 namespace Oms.Host
 {
     public class Startup
     {
-        const string CORS = "Cors";
-        const string AUTH = "Auth";
-        const string BASE_HOST = "Oms.Host";
-        const string BASE_APPLICATION = "Oms.Application";
-        const string BASE_DOMAIN = "Oms.Domain";
-        const string BASE_REPOSITORY = "Oms.Repository";
+        private const string CORS = "Cors";
+        private const string AUTH = "Auth";
+        private const string QUARTZ = "Quartz";
+        private const string BASE_HOST = "Oms.Host";
+        private const string BASE_APPLICATION = "Oms.Application";
+        private const string BASE_DOMAIN = "Oms.Domain";
+        private const string BASE_REPOSITORY = "Oms.Repository";
         private readonly string HTTP_SERVICE_KEY = "HttpService";
         private readonly string HTTP_SERVICE = "Oms.HttpService";
         public IConfiguration Configuration { get; }
@@ -87,8 +95,8 @@ namespace Oms.Host
                     c.SwaggerDoc(version, new OpenApiInfo
                     {
                         Version = version,
-                        Title = $"系统基础服务接口文档 {version}",
-                        Description = $"OneForAll Base Web API {version}"
+                        Title = $"商户中心-接口文档 {version}",
+                        Description = $"OneForAll Oms Web API {version}"
                     });
                 });
 
@@ -113,11 +121,36 @@ namespace Oms.Host
             });
             #endregion
 
+            #region Quartz
+
+            var quartzConfig = new QuartzScheduleJobConfig();
+            Configuration.GetSection(QUARTZ).Bind(quartzConfig);
+            // 注册QuartzJobs目录下的定时任务
+            if (quartzConfig != null)
+            {
+                services.AddSingleton(quartzConfig);
+                services.AddSingleton<IJobFactory, ScheduleJobFactory>();
+                services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+                services.AddHostedService<QuartzJobHostService>();
+                var jobNamespace = BASE_HOST.Append(".QuartzJobs");
+                quartzConfig.ScheduleJobs.ForEach(e =>
+                {
+                    var typeName = jobNamespace + "." + e.TypeName;
+                    var jobType = Assembly.Load(BASE_HOST).GetType(typeName);
+                    if (jobType != null)
+                    {
+                        e.JobType = jobType;
+                        services.AddSingleton(e.JobType);
+                    }
+                });
+            }
+            #endregion
+
             #region Http
 
             var serviceConfig = new HttpServiceConfig();
             Configuration.GetSection(HTTP_SERVICE_KEY).Bind(serviceConfig);
-            var props = OneForAll.Core.Utility.ReflectionHelper.GetPropertys(serviceConfig);
+            var props = ReflectionHelper.GetPropertys(serviceConfig);
             props.ForEach(e =>
             {
                 services.AddHttpClient(e.Name, c =>
@@ -155,7 +188,7 @@ namespace Oms.Host
 
             #region DI
 
-            services.AddDbContext<OneForAllContext>(options =>
+            services.AddDbContext<OmsContext>(options =>
                 options.UseSqlServer(Configuration["ConnectionStrings:Default"]));
             services.AddSingleton<IUploader, Uploader>();
             services.AddScoped<ITenantProvider, TenantProvider>();
@@ -191,11 +224,6 @@ namespace Oms.Host
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
-            // Http
-            builder.RegisterAssemblyTypes(Assembly.Load(HTTP_SERVICE))
-               .Where(t => t.Name.EndsWith("Service"))
-               .AsImplementedInterfaces();
-
             // 基础
             builder.RegisterGeneric(typeof(Repository<>))
                 .As(typeof(IEFCoreRepository<>));
@@ -208,10 +236,15 @@ namespace Oms.Host
                 .Where(t => t.Name.EndsWith("Manager"))
                 .AsImplementedInterfaces();
 
-            builder.RegisterType(typeof(OneForAllContext)).Named<DbContext>("OneForAllContext");
+            builder.RegisterType(typeof(OmsContext)).Named<DbContext>("OmsContext");
             builder.RegisterAssemblyTypes(Assembly.Load(BASE_REPOSITORY))
                .Where(t => t.Name.EndsWith("Repository"))
-               .WithParameter(ResolvedParameter.ForNamed<DbContext>("OneForAllContext"))
+               .WithParameter(ResolvedParameter.ForNamed<DbContext>("OmsContext"))
+               .AsImplementedInterfaces();
+
+            // Http
+            builder.RegisterAssemblyTypes(Assembly.Load(HTTP_SERVICE))
+               .Where(t => t.Name.EndsWith("Service"))
                .AsImplementedInterfaces();
         }
 
@@ -238,7 +271,7 @@ namespace Oms.Host
                 RequestPath = new PathString("/resources"),
                 OnPrepareResponse = (c) =>
                 {
-                    c.Context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                    c.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
                 }
             });
 

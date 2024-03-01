@@ -49,6 +49,11 @@ namespace Oms.Domain.Enums
         /// <summary>
         /// 已取消
         /// </summary>
-        Canceled = 99
+        Canceled = 98,
+
+        /// <summary>
+        /// 异常订单
+        /// </summary>
+        Error = 99
     }
 }
