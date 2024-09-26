@@ -45,6 +45,14 @@ namespace Oms.Domain.Repositorys
         Task<OmsWxPaySetting> GetIQFAsync(Guid tenantId, string mchid);
 
         /// <summary>
+        /// 查询分页
+        /// </summary>
+        /// <param name="pageIndex">页码</param>
+        /// <param name="pageSize">页数</param>
+        /// <returns>分页列表</returns>
+        Task<PageList<OmsWxPaySetting>> GetPageIQFAsync(int pageIndex, int pageSize);
+
+        /// <summary>
         /// 统计数量
         /// </summary>
         /// <returns>分页列表</returns>

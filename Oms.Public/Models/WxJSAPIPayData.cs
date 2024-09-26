@@ -15,6 +15,13 @@ namespace Oms.Public.Models
     public class WxJSAPIPayData
     {
         /// <summary>
+        /// 商户申请的公众号对应的AppID，由微信支付生成
+        /// </summary>
+        [Required]
+        [JsonProperty("appId")]
+        public string AppId { get; set; }
+
+        /// <summary>
         /// timeStamp
         /// </summary>
         [Required]

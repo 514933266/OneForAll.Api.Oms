@@ -6,22 +6,22 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Oms.Host
 {
-    public partial class OmsContext : DbContext
+    public partial class OmsDbContext : DbContext
     {
         private Guid _tenantId;
-        public OmsContext(DbContextOptions<OmsContext> options)
+        public OmsDbContext(DbContextOptions<OmsDbContext> options)
             : base(options)
         {
 
         }
 
-        //public OmsContext(
-        //    DbContextOptions<OmsContext> options,
-        //    ITenantProvider tenantProvider)
-        //    : base(options)
-        //{
-        //    _tenantId = tenantProvider.GetTenantId();
-        //}
+        public OmsDbContext(
+            DbContextOptions<OmsDbContext> options,
+            ITenantProvider tenantProvider)
+            : base(options)
+        {
+            _tenantId = tenantProvider.GetTenantId();
+        }
 
         public virtual DbSet<OmsOrder> OmsOrder { get; set; }
         public virtual DbSet<OmsOrderItem> OmsOrderItem { get; set; }

@@ -12,6 +12,7 @@ using Oms.Public.Models;
 using OneForAll.Core.DDD;
 using Castle.Core.Internal;
 using Oms.HttpService.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Oms.Host.Controllers
 {
@@ -36,6 +37,8 @@ namespace Oms.Host.Controllers
         [HttpPost]
         public async Task<BaseMessage> CreateOrderAsync([FromBody] OmsOrderForm form)
         {
+            if (form.PayType.IsNullOrEmpty())
+                form.PayType = "微信小程序支付";
             return await _service.CreateOrderAsync(form);
         }
     }

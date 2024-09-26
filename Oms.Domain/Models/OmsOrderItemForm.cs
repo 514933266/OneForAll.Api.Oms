@@ -46,7 +46,7 @@ namespace Oms.Domain.Models
         /// 商品数量
         /// </summary>
         [Required]
-        [Range(1, 999)]
+        [Range(1,99999)]
         public int Quantity { get; set; }
 
         /// <summary>

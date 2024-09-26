@@ -188,7 +188,7 @@ namespace Oms.Host
 
             #region DI
 
-            services.AddDbContext<OmsContext>(options =>
+            services.AddDbContext<OmsDbContext>(options =>
                 options.UseSqlServer(Configuration["ConnectionStrings:Default"]));
             services.AddSingleton<IUploader, Uploader>();
             services.AddScoped<ITenantProvider, TenantProvider>();
@@ -236,10 +236,10 @@ namespace Oms.Host
                 .Where(t => t.Name.EndsWith("Manager"))
                 .AsImplementedInterfaces();
 
-            builder.RegisterType(typeof(OmsContext)).Named<DbContext>("OmsContext");
+            builder.RegisterType(typeof(OmsDbContext)).Named<DbContext>("OmsDbContext");
             builder.RegisterAssemblyTypes(Assembly.Load(BASE_REPOSITORY))
                .Where(t => t.Name.EndsWith("Repository"))
-               .WithParameter(ResolvedParameter.ForNamed<DbContext>("OmsContext"))
+               .WithParameter(ResolvedParameter.ForNamed<DbContext>("OmsDbContext"))
                .AsImplementedInterfaces();
 
             // Http

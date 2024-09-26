@@ -1,7 +1,6 @@
 ﻿using Oms.Domain.AggregateRoots;
 using Oms.Domain.Models;
 using OneForAll.Core;
-using OneForAll.EFCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,5 +27,20 @@ namespace Oms.Domain.Interfaces
         /// <param name="form">实体</param>
         /// <returns>调起微信支付的sign</returns>
         Task<BaseErrType> UpdateAsync(OmsOrderCallbackRecordUpdateForm form);
+
+        /// <summary>
+        /// 回传订单信息
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="orderId">订单id</param>
+        /// <returns></returns>
+        Task<BaseMessage> SynOrderAsync(string url, Guid orderId);
+
+        /// <summary>
+        /// 回传订单信息
+        /// </summary>
+        /// <param name="orderId">订单id</param>
+        /// <returns></returns>
+        Task<BaseMessage> SynOrderAsync(Guid orderId);
     }
 }

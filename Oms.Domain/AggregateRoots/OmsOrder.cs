@@ -223,7 +223,7 @@ namespace Oms.Domain.AggregateRoots
                 PlatformPayerId = wxOrder.Payer.Openid;
                 PlatformOrderNo = wxOrder.TransactionId;
                 PayTime = wxOrder.SuccessTime;
-                PaidAmount = (wxOrder.Amount.Total / 100);
+                PaidAmount = Math.Round(wxOrder.Amount.Total / 100m, 2);
                 if (!wxOrder.Amount.Currency.IsNullOrEmpty())
                     Currency = wxOrder.Amount.Currency;
 

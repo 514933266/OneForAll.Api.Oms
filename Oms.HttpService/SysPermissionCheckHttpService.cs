@@ -66,7 +66,7 @@ namespace ZSOms.HttpService
 
                 var client = _httpClientFactory.CreateClient(_config.SysPermissionCheck);
                 client.DefaultRequestHeaders.Add(AUTH_KEY, Token);
-                var postData = new PermissionCheck()
+                var postData = new PermissionCheckRequest()
                 {
                     SysUserId = new Guid(uid),
                     Controller = controller,

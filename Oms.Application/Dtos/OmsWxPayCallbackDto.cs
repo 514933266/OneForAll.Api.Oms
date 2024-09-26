@@ -11,7 +11,7 @@ namespace Oms.Application.Dtos
     /// <summary>
     /// 微信支付回调响应
     /// </summary>
-    public class OmsWxmpPayCallbackDto
+    public class OmsWxPayCallbackDto
     {
         /// <summary>
         /// 返回状态码,错误码，SUCCESS为清算机构接收成功，其他错误码为失败。

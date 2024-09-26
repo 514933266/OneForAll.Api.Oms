@@ -1,4 +1,5 @@
 ﻿using Oms.Domain.AggregateRoots;
+using Oms.Domain.Aggregates;
 using Oms.Domain.Enums;
 using Oms.Domain.Models;
 using Oms.Domain.ValueObject;
@@ -29,6 +30,19 @@ namespace Oms.Domain.Repositorys
         /// <param name="orderNo">订单编号</param>
         /// <returns>实体</returns>
         Task<OmsOrder> GetIQFAsync(string orderNo);
+
+        /// <summary>
+        /// 查询指定订单
+        /// </summary>
+        /// <returns>实体</returns>
+        Task<OmsOrderAggr> GetAggrIQFAsync(Guid id);
+
+        /// <summary>
+        /// 查询订单列表
+        /// </summary>
+        /// <param name="orderNos">订单编号</param>
+        /// <returns></returns>
+        Task<IEnumerable<OmsOrder>> GetListAsync(List<string> orderNos);
 
         /// <summary>
         /// 查询分页

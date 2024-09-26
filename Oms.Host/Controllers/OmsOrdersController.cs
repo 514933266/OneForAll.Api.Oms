@@ -12,6 +12,8 @@ using Oms.Public.Models;
 using Oms.Domain.Enums;
 using OneForAll.Core.DDD;
 using Oms.Domain.ValueObject;
+using Oms.Host.Filters;
+using OneForAll.Core.OAuth;
 
 namespace Oms.Host.Controllers
 {
@@ -54,6 +56,17 @@ namespace Oms.Host.Controllers
         }
 
         /// <summary>
+        /// 查询订单列表
+        /// </summary>
+        /// <param name="orderNos">订单编号</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IEnumerable<OmsOrderDto>> GetListAsync([FromQuery] List<string> orderNos)
+        {
+            return await _service.GetListAsync(orderNos);
+        }
+
+        /// <summary>
         /// 获取分页
         /// </summary>
         /// <param name="pageIndex">页码</param>
@@ -73,6 +86,7 @@ namespace Oms.Host.Controllers
         /// <returns>权限列表</returns>
         [HttpGet]
         [Route("{pageIndex}/{pageSize}")]
+        [CheckPermission(Action = ConstPermission.EnterView)]
         public async Task<PageList<OmsOrderDto>> GetPageAsync(
             int pageIndex,
             int pageSize,
@@ -112,6 +126,7 @@ namespace Oms.Host.Controllers
         /// <param name="form">自定义订单</param>
         /// <returns></returns>
         [HttpPost]
+        [CheckPermission(Action = ConstPermission.EnterView)]
         public async Task<BaseMessage> AddAsync([FromBody] OmsCustomOrderForm form)
         {
             var msg = new BaseMessage();

@@ -15,26 +15,26 @@ using OneForAll.Core.Extension;
 namespace Oms.Host.Controllers
 {
     /// <summary>
-    /// 微信小程序支付回调
+    /// 微信支付回调
     /// </summary>  
-    [Route("api/wxmppay/callback")]
-    public class OmsWxmpPayCallbackController : BaseController
+    [Route("open-api/wxpay/callback")]
+    public class OmsWxPayCallbackController : BaseController
     {
-        private readonly IOmsWxmpPayCallbackService _service;
-        public OmsWxmpPayCallbackController(IOmsWxmpPayCallbackService service)
+        private readonly IOmsWxPayCallbackService _service;
+        public OmsWxPayCallbackController(IOmsWxPayCallbackService service)
         {
             _service = service;
         }
 
         /// <summary>
-        /// 回调更新订单状态
+        /// 小程序回调更新订单状态
         /// </summary>
         /// <param name="settingId">设置id</param>
         /// <param name="form">支付回调</param>
         /// <returns></returns>
         [HttpPost]
-        [Route("{settingId}")]
-        public async Task<OmsWxmpPayCallbackDto> UpdateOrderAsync(Guid settingId, [FromBody] OmsWxmpPayCallbackForm form)
+        [Route("wxmp/{settingId}")]
+        public async Task<OmsWxPayCallbackDto> UpdateOrderAsync(Guid settingId, [FromBody] OmsWxmpPayCallbackForm form)
         {
             return await _service.UpdateOrderAsync(settingId, form);
         }

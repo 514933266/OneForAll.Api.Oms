@@ -23,6 +23,13 @@ namespace Oms.Domain.Interfaces
         Task<OmsOrderAggr> GetAsync(Guid id);
 
         /// <summary>
+        /// 查询订单列表
+        /// </summary>
+        /// <param name="orderNos">订单编号</param>
+        /// <returns></returns>
+        Task<IEnumerable<OmsOrderAggr>> GetListAsync(List<string> orderNos);
+
+        /// <summary>
         /// 获取分页列表
         /// </summary>
         /// <param name="pageIndex">页码</param>

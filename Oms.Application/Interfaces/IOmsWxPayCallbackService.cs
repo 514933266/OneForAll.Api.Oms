@@ -12,7 +12,7 @@ namespace Oms.Application.Interfaces
     /// <summary>
     /// 微信小程序支付回调
     /// </summary>
-    public interface IOmsWxmpPayCallbackService
+    public interface IOmsWxPayCallbackService
     {
         /// <summary>
         /// 回调更新订单状态
@@ -20,6 +20,6 @@ namespace Oms.Application.Interfaces
         /// <param name="settingId">商户设置id</param>
         /// <param name="form">支付回调</param>
         /// <returns></returns>
-        Task<OmsWxmpPayCallbackDto> UpdateOrderAsync(Guid settingId, OmsWxmpPayCallbackForm form);
+        Task<OmsWxPayCallbackDto> UpdateOrderAsync(Guid settingId, OmsWxmpPayCallbackForm form);
     }
 }

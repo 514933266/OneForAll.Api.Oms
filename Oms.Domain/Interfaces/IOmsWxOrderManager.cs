@@ -14,6 +14,14 @@ namespace Oms.Domain.Interfaces
     public interface IOmsWxOrderManager
     {
         /// <summary>
+        /// 创建公众号支付订单
+        /// </summary>
+        /// <param name="setting">商户支付设置</param>
+        /// <param name="order">系统订单</param>
+        /// <returns>调起微信支付的sign</returns>
+        Task<WxJSAPIPayData> CreateWxgzhAsync(OmsWxPaySetting setting, OmsOrder order);
+
+        /// <summary>
         /// 创建JSAPI订单
         /// </summary>
         /// <param name="setting">商户支付设置</param>

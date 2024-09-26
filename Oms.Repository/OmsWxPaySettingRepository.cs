@@ -48,7 +48,7 @@ namespace Oms.Repository
                 .Take(pageSize)
                 .ToListAsync();
 
-            return new PageList<OmsWxPaySetting>(total, pageSize, pageIndex, data);
+            return new PageList<OmsWxPaySetting>(total, pageIndex, pageSize, data);
         }
 
         /// <summary>
@@ -82,6 +82,26 @@ namespace Oms.Repository
             if (!mchid.IsNullOrEmpty())
                 predicate = predicate.And(w => w.Mchid == mchid);
             return await DbSet.IgnoreQueryFilters().Where(predicate).FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// 查询分页
+        /// </summary>
+        /// <param name="pageIndex">页码</param>
+        /// <param name="pageSize">页数</param>
+        /// <returns>分页列表</returns>
+        public async Task<PageList<OmsWxPaySetting>> GetPageIQFAsync(int pageIndex, int pageSize)
+        {
+            var total = await DbSet.IgnoreQueryFilters().CountAsync();
+            var data = await DbSet
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .OrderByDescending(e => e.CreateTime)
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PageList<OmsWxPaySetting>(total, pageIndex, pageSize, data);
         }
 
         /// <summary>

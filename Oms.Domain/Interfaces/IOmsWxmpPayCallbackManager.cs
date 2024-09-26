@@ -20,6 +20,6 @@ namespace Oms.Domain.Interfaces
         /// <param name="setting">商户设置</param>
         /// <param name="wxOrder">微信订单数据</param>
         /// <returns></returns>
-        Task<BaseErrType> UpdateOrderAsync(OmsWxPaySetting setting, OmsWxmpPayCallbackOrderForm wxOrder);
+        Task<BaseMessage> UpdateOrderAsync(OmsWxPaySetting setting, OmsWxmpPayCallbackOrderForm wxOrder);
     }
 }

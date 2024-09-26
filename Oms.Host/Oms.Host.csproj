@@ -67,7 +67,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
-    <Folder Include="upload\" />
   </ItemGroup>
 
   <ItemGroup>

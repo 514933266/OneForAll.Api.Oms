@@ -1,15 +1,12 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Oms.Application.Dtos;
 using Oms.Application.Interfaces;
-using Oms.Domain.AggregateRoots;
 using Oms.Domain.Aggregates;
 using Oms.Domain.Interfaces;
 using Oms.Domain.Models;
 using Oms.Domain.Repositorys;
 using Oms.Domain.ValueObject;
 using OneForAll.Core;
-using OneForAll.Core.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,6 +54,17 @@ namespace Oms.Application
         {
             var order = await _manager.GetAsync(orderId);
             return _mapper.Map<OmsOrderDto>(order);
+        }
+
+        /// <summary>
+        /// 查询订单列表
+        /// </summary>
+        /// <param name="orderNos">订单编号</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<OmsOrderDto>> GetListAsync(List<string> orderNos)
+        {
+            var data = await _manager.GetListAsync(orderNos);
+            return _mapper.Map<IEnumerable<OmsOrderAggr>, IEnumerable<OmsOrderDto>>(data);
         }
 
         /// <summary>

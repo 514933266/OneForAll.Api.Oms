@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using Oms.Public.Models;
 using OneForAll.Core.Utility;
 using OneForAll.File;
@@ -14,22 +9,51 @@ namespace Oms.Public
     /// <summary>
     /// 微信支付SDK
     /// </summary>
-    public static class WxmpPayV3SDK
+    public static class WxPayV3SDK
     {
         /// <summary>
-        /// 获取微信小程序下单签名
+        /// 获取JSAPI下单签名
         /// </summary>
         /// <param name="mchid">商户id</param>
         /// <param name="serialNo">证书序列号</param>
         /// <param name="body">请求体</param>
         /// <returns></returns>
-        public static string GetWxmpCreateOrderSign(string mchid, string serialNo, string privateKey, string body)
+        public static string GetJSAPIOrderSign(string mchid, string serialNo, string privateKey, string body)
         {
             var method = "POST";
             var url = "/v3/pay/transactions/jsapi";
+            return GetSign(method, url, mchid, serialNo, privateKey, body);
+        }
+
+        /// <summary>
+        /// 获取下载商户证书签名
+        /// </summary>
+        /// <param name="mchid">商户id</param>
+        /// <param name="serialNo">证书序列号</param>
+        /// <param name="body">请求体</param>
+        /// <returns></returns>
+        public static string GetCertSign(string mchid, string serialNo, string privateKey, string body)
+        {
+            var method = "GET";
+            var url = "/v3/certificates";
+            return GetSign(method, url, mchid, serialNo, privateKey, body);
+        }
+
+        /// <summary>
+        /// 生成签名
+        /// </summary>
+        /// <param name="method"></param>
+        /// <param name="url"></param>
+        /// <param name="mchid"></param>
+        /// <param name="serialNo"></param>
+        /// <param name="privateKey"></param>
+        /// <param name="body"></param>
+        /// <returns></returns>
+        public static string GetSign(string method, string url, string mchid, string serialNo, string privateKey, string body)
+        {
             var tt = TimeHelper.ToTimeStamp().ToString();
             var nonceStr = StringHelper.GetRandomString(32);
-            var sign = GetSha256WithRSASign(privateKey, $"{method}\n{url}\n{tt}\n{nonceStr}\n{body}\n");
+            var sign = GetSha256WithRSASign(privateKey, $"{method}\n{url}\n{tt}\n{nonceStr}\n{(body.Length > 0 ? body + "\n" : body)}");
             return $"WECHATPAY2-SHA256-RSA2048 mchid=\"{mchid}\",serial_no=\"{serialNo}\",timestamp=\"{tt}\",nonce_str=\"{nonceStr}\",signature=\"{sign}\"";
         }
 
@@ -47,6 +71,28 @@ namespace Oms.Public
             var sign = GetSha256WithRSASign(privateKey, $"{appId}\n{tt}\n{nonceStr}\n{package}\n");
             return new WxmpPayData()
             {
+                TimeStamp = tt,
+                NonceStr = nonceStr,
+                Package = package,
+                PaySign = sign
+            };
+        }
+
+        /// <summary>
+        /// 获取微信JSAPI发起支付数据
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="prepayId"></param>
+        /// <returns></returns>
+        public static WxJSAPIPayData GetWxJSAPIPayData(string appId, string prepayId, string privateKey)
+        {
+            var tt = TimeHelper.ToTimeStamp().ToString();
+            var nonceStr = StringHelper.GetRandomString(32);
+            var package = "prepay_id=" + prepayId;
+            var sign = GetSha256WithRSASign(privateKey, $"{appId}\n{tt}\n{nonceStr}\n{package}\n");
+            return new WxJSAPIPayData()
+            {
+                AppId = appId,
                 TimeStamp = tt,
                 NonceStr = nonceStr,
                 Package = package,

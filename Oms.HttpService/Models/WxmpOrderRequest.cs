@@ -67,7 +67,7 @@ namespace Oms.HttpService.Models
         [Required]
         [JsonProperty("notify_url")]
         [StringLength(300)]
-        public string NotifyUrl { get; set; }
+        public string WxmpNotifyUrl { get; set; }
 
         /// <summary>
         /// 订单优惠标记

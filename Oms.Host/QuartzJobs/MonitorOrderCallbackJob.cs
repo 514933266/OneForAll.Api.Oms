@@ -16,6 +16,8 @@ using Oms.Domain.Models;
 using Oms.HttpService.Interfaces;
 using NPOI.SS.Formula.Functions;
 using Oms.HttpService.Models;
+using StackExchange.Redis;
+using Oms.Domain.Aggregates;
 
 namespace Oms.Host.QuartzJobs
 {
@@ -56,7 +58,11 @@ namespace Oms.Host.QuartzJobs
                     callbacks.ForEach(async e =>
                     {
                         if (e.LastUpdateTime.AddMinutes(e.TimeStep) <= DateTime.Now && !e.CallBackUrl.IsNullOrEmpty())
-                            await SynOrderAsync(e.CallBackUrl, e.Order);
+                        {
+                            var result = await _callbackManager.SynOrderAsync(e.CallBackUrl, e.OmsOrderId);
+                            var order = result.Data as OmsOrderAggr;
+                            await _jobHttpService.LogAsync(_config.ClientCode, typeof(MonitorOrderCallbackJob).Name, $"订单id：{order?.Order?.Id},流水号：{order?.Order?.OrderNo},回调{(result.Status ? "成功" : "失败,原因：" + result.Message)}");
+                        }
 
                     });
                 }
@@ -66,24 +72,6 @@ namespace Oms.Host.QuartzJobs
             {
                 await SendGlobalExceptionAsync(ex);
             }
-        }
-
-        // 回传订单信息
-        private async Task<BaseErrType> SynOrderAsync(string url, OmsOrder order)
-        {
-            /* 此版本忽略签名校验以及确认返回流程，后续补上 */
-            var client = new HttpClient();
-            var response = await client.PostAsync(url, order, new JsonMediaTypeFormatter());
-            var result = await response.Content.ReadAsAsync<BaseMessage>();
-            var record = new OmsOrderCallbackRecordUpdateForm()
-            {
-                OrderId = order.Id,
-                Error = result.Message,
-                IsSuccess = result.Status
-            };
-            var errType = await _callbackManager.UpdateAsync(record);
-            await _jobHttpService.LogAsync(_config.ClientCode, typeof(MonitorOrderCallbackJob).Name, $"订单id：{order.Id},流水号：{order.OrderNo},回调{(result.Status ? "成功" : "失败,原因：" + result.Message)}");
-            return errType;
         }
 
         // 发送全局异常

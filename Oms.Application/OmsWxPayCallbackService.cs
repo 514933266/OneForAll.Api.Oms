@@ -21,18 +21,21 @@ namespace Oms.Application
     /// <summary>
     /// 微信小程序支付回调
     /// </summary>
-    public class OmsWxmpPayCallbackService : IOmsWxmpPayCallbackService
+    public class OmsWxPayCallbackService : IOmsWxPayCallbackService
     {
         private readonly IOmsOrderLogManager _logManager;
         private readonly IOmsWxmpPayCallbackManager _manager;
+        private readonly IOmsOrderCallbackRecordManager _cbManager;
         private readonly IOmsWxPaySettingRepository _settingRepository;
 
-        public OmsWxmpPayCallbackService(
+        public OmsWxPayCallbackService(
             IOmsOrderLogManager logManager,
             IOmsWxmpPayCallbackManager manager,
+            IOmsOrderCallbackRecordManager cbManager,
             IOmsWxPaySettingRepository settingRepository)
         {
             _manager = manager;
+            _cbManager = cbManager;
             _logManager = logManager;
             _settingRepository = settingRepository;
         }
@@ -43,52 +46,54 @@ namespace Oms.Application
         /// <param name="settingId">商户设置id</param>
         /// <param name="form">支付回调</param>
         /// <returns></returns>
-        public async Task<OmsWxmpPayCallbackDto> UpdateOrderAsync(Guid settingId, OmsWxmpPayCallbackForm form)
+        public async Task<OmsWxPayCallbackDto> UpdateOrderAsync(Guid settingId, OmsWxmpPayCallbackForm form)
         {
             var setting = await _settingRepository.GetIQFAsync(settingId);
             if (setting == null)
-                return new OmsWxmpPayCallbackDto() { Code = "FAIL", Message = "商户数据异常" };
+                return new OmsWxPayCallbackDto() { Code = "FAIL", Message = "商户数据异常" };
 
             // 1. 解密微信密文
             var content = AesGcmHelper.Decrypt(form.Resource.AssociatedData, form.Resource.Nonce, form.Resource.Ciphertext, setting.APIv3Key);
             var wxOrder = content.FromJson<OmsWxmpPayCallbackOrderForm>();
 
             // 2. 更新订单信息
-            if (wxOrder.Attach.IsNullOrEmpty())
-                return GetCallBackData(BaseErrType.DataNotFound);
+            var result = await _manager.UpdateOrderAsync(setting, wxOrder);
 
-            var errType = await _manager.UpdateOrderAsync(setting, wxOrder);
-
-            // 3. 记录支付日志
-            var order = new OmsOrder();
-            order.SynWxOrder(wxOrder);
-            await _logManager.AddAsync(new OmsOrderLogForm()
+            // 3. 回调业务系统
+            if (result.ErrType == BaseErrType.Success)
             {
-                OrderId = order.Id,
-                State = order.State,
-                PayState = order.PayState,
-                ShippingState = order.ShippingState
-            });
+                var order = result.Data as OmsOrder;
+                await _logManager.AddAsync(new OmsOrderLogForm()
+                {
+                    OrderId = order.Id,
+                    State = order.State,
+                    PayState = order.PayState,
+                    ShippingState = order.ShippingState
+                });
 
-            return GetCallBackData(errType);
+                if (!setting.CallbackUrl.IsNullOrEmpty())
+                    await _cbManager.SynOrderAsync(setting.CallbackUrl, order.Id);
+            }
+
+            return GetCallBackData(result.ErrType);
         }
 
-        private OmsWxmpPayCallbackDto GetCallBackData(BaseErrType errType)
+        private OmsWxPayCallbackDto GetCallBackData(BaseErrType errType)
         {
             switch (errType)
             {
                 case BaseErrType.Success:
-                    return new OmsWxmpPayCallbackDto();
+                    return new OmsWxPayCallbackDto();
                 case BaseErrType.NotAllow:
-                    return new OmsWxmpPayCallbackDto() { Code = "FAIL", Message = "未安装证书" };
+                    return new OmsWxPayCallbackDto() { Code = "FAIL", Message = "未安装证书" };
                 case BaseErrType.DataNotFound:
-                    return new OmsWxmpPayCallbackDto() { Code = "FAIL", Message = "订单不存在" };
+                    return new OmsWxPayCallbackDto() { Code = "FAIL", Message = "订单不存在" };
                 case BaseErrType.AuthCodeInvalid:
-                    return new OmsWxmpPayCallbackDto() { Code = "FAIL", Message = "签名错误" };
+                    return new OmsWxPayCallbackDto() { Code = "FAIL", Message = "签名错误" };
                 case BaseErrType.DataError:
-                    return new OmsWxmpPayCallbackDto() { Code = "FAIL", Message = "商户数据异常" };
+                    return new OmsWxPayCallbackDto() { Code = "FAIL", Message = "商户数据异常" };
                 default:
-                    return new OmsWxmpPayCallbackDto() { Code = "FAIL", Message = "未知错误" };
+                    return new OmsWxPayCallbackDto() { Code = "FAIL", Message = "未知错误" };
             }
         }
     }

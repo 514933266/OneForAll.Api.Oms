@@ -9,11 +9,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Oms.Domain.AggregateRoots;
 using Oms.Domain.Repositorys;
-using Oms.Domain.Aggregates;
 using Oms.Domain.Enums;
 using OneForAll.Core.Extension;
 using Oms.Domain.Models;
 using Oms.Domain.ValueObject;
+using Oms.Domain.Aggregates;
 
 namespace Oms.Repository
 {
@@ -46,6 +46,36 @@ namespace Oms.Repository
         {
             var no = orderNo.TryLong();
             return await DbSet.IgnoreQueryFilters().FirstOrDefaultAsync(w => w.OrderNo == no);
+        }
+
+        /// <summary>
+        /// 查询指定订单
+        /// </summary>
+        /// <returns>实体</returns>
+        public async Task<OmsOrderAggr> GetAggrIQFAsync(Guid id)
+        {
+            var itemDbSet = Context.Set<OmsOrderItem>();
+            var sql = (from order in DbSet
+                       join item in itemDbSet on order.Id equals item.OmsOrderId
+                       group new { item, order } by item.OmsOrderId into gItems
+                       select new OmsOrderAggr()
+                       {
+                           OrderId = gItems.First().order.Id,
+                           Order = gItems.First().order,
+                           Items = gItems.Select(s => s.item).OrderBy(o => o.ProductNo).ToList()
+                       });
+            return await sql.IgnoreQueryFilters().FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// 查询订单列表
+        /// </summary>
+        /// <param name="orderNos">订单编号</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<OmsOrder>> GetListAsync(List<string> orderNos)
+        {
+            var nos = orderNos.ConvertAll(item => item.TryLong());
+            return await DbSet.IgnoreQueryFilters().Where(w => nos.Contains(w.OrderNo)).ToListAsync();
         }
 
         /// <summary>
@@ -89,18 +119,16 @@ namespace Oms.Repository
                 predicate = predicate.And(w => w.CreateTime <= form.CreateEndTime);
 
             var total = await DbSet
-                .IgnoreQueryFilters()
                 .CountAsync(predicate);
 
             var items = await DbSet
-                .IgnoreQueryFilters()
                 .Where(predicate)
                 .OrderByDescending(o => o.CreateTime)
                 .Skip(pageSize * (pageIndex - 1))
                 .Take(pageSize)
                 .ToListAsync();
 
-            return new PageList<OmsOrder>(total, pageSize, pageIndex, items);
+            return new PageList<OmsOrder>(total, pageIndex, pageSize, items);
         }
 
         /// <summary>
@@ -136,7 +164,7 @@ namespace Oms.Repository
                 .Take(pageSize)
                 .ToListAsync();
 
-            return new PageList<OmsOrder>(total, pageSize, pageIndex, items);
+            return new PageList<OmsOrder>(total, pageIndex, pageSize, items);
         }
 
         /// <summary>

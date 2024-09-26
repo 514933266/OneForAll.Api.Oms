@@ -8,17 +8,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OneForAll.Core.Utility;
 using Oms.Domain.AggregateRoots;
-using OneForAll.Core.Extension;
-using Microsoft.Extensions.Caching.Distributed;
-using Oms.Public.Models;
-using OneForAll.Core.Security;
 using Microsoft.AspNetCore.Http;
-using Oms.Domain.Aggregates;
 using Oms.HttpService.Interfaces;
-using Oms.HttpService.Models;
-using OneForAll.EFCore;
+using Oms.Domain.Aggregates;
 
 namespace Oms.Domain
 {
@@ -27,13 +20,22 @@ namespace Oms.Domain
     /// </summary>
     public class OmsOrderCallbackRecordManager : OmsBaseManager, IOmsOrderCallbackRecordManager
     {
+        private readonly IOmsOrderRepository _orderRepository;
+        private readonly IOmsOrderItemRepository _itemRepository;
         private readonly IOmsOrderCallbackRecordRepository _repository;
+        private readonly IOrderCallbackHttpService _httpService;
         public OmsOrderCallbackRecordManager(
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor,
-            IOmsOrderCallbackRecordRepository repository) : base(mapper, httpContextAccessor)
+            IOmsOrderRepository orderRepository,
+            IOmsOrderItemRepository itemRepository,
+            IOmsOrderCallbackRecordRepository repository,
+            IOrderCallbackHttpService httpService) : base(mapper, httpContextAccessor)
         {
+            _orderRepository = orderRepository;
+            _itemRepository = itemRepository;
             _repository = repository;
+            _httpService = httpService;
         }
 
         /// <summary>
@@ -45,8 +47,6 @@ namespace Oms.Domain
         {
             var exists = await _repository.GetAsync(w => w.OmsOrderId == form.OmsOrderId);
             if (exists != null)
-                return BaseErrType.Success;
-            if (form.CallBackUrl.IsNullOrEmpty())
                 return BaseErrType.Success;
 
             return await ResultAsync(() => _repository.AddAsync(form));
@@ -73,6 +73,50 @@ namespace Oms.Domain
             data.LastUpdateTime = DateTime.Now;
 
             return await ResultAsync(_repository.SaveChangesAsync);
+        }
+
+        /// <summary>
+        /// 回传订单信息
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="orderId">订单id</param>
+        /// <returns></returns>
+        public async Task<BaseMessage> SynOrderAsync(string url, Guid orderId)
+        {
+            var result = new BaseMessage();
+            var order = await _orderRepository.GetIQFAsync(orderId);
+            if (order != null)
+            {
+                var items = await _itemRepository.GetListAsync(w => w.OmsOrderId == orderId);
+                var data = _mapper.Map<OmsOrder, OmsOrderCallBackAggr>(order);
+                if (items.Any())
+                    data.Items.AddRange(items);
+                result = await _httpService.SynOrderAsync(url, data);
+                result.Data = order;
+                result.ErrType = await UpdateAsync(new OmsOrderCallbackRecordUpdateForm()
+                {
+                    OrderId = orderId,
+                    Error = result.Message,
+                    IsSuccess = result.Status
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 回传订单信息
+        /// </summary>
+        /// <param name="orderId">订单id</param>
+        /// <returns></returns>
+        public async Task<BaseMessage> SynOrderAsync(Guid orderId)
+        {
+            var result = new BaseMessage();
+            var data = await _repository.GetAsync(w => w.OmsOrderId == orderId);
+            if (data != null)
+            {
+                result = await SynOrderAsync(data.CallBackUrl, orderId);
+            }
+            return result;
         }
     }
 }

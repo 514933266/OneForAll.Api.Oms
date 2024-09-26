@@ -10,6 +10,7 @@ using Oms.Domain.Repositorys;
 using Oms.HttpService.Interfaces;
 using Oms.Public.Models;
 using OneForAll.Core;
+using OneForAll.Core.Extension;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace Oms.Domain
     /// <summary>
     /// 个人订单
     /// </summary>
-    public class OmsCustomerOrderManager : OmsBaseManager, IOmsPersonalOrderManager
+    public class OmsCustomerOrderManager : OmsBaseManager, IOmsCustomerOrderManager
     {
         private readonly IOmsOrderRepository _repository;
         private readonly IOmsOrderItemRepository _itemRepository;
@@ -49,9 +50,30 @@ namespace Oms.Domain
             var result = _mapper.Map<OmsOrderAggr>(data);
             if (items.Any())
             {
-                result.OmsOrderItems.AddRange(items);
+                result.Items.AddRange(items);
             }
             return result;
+        }
+
+        /// <summary>
+        /// 查询订单列表
+        /// </summary>
+        /// <param name="orderNos">订单编号</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<OmsOrderAggr>> GetListAsync(List<string> orderNos)
+        {
+            var data = await _repository.GetListAsync(orderNos);
+            var oids = data.Select(s => s.Id).ToList();
+            var items = await _itemRepository.GetListAsync(w => oids.Contains(w.OmsOrderId));
+
+            var orders = _mapper.Map<IEnumerable<OmsOrderAggr>>(data);
+            orders.ForEach(e =>
+            {
+                var cItem = items.Where(w => w.OmsOrderId == e.OrderId).ToList();
+                if (items.Any())
+                    e.Items.AddRange(cItem);
+            });
+            return orders;
         }
 
         /// <summary>
@@ -83,9 +105,9 @@ namespace Oms.Domain
 
                 result.ForEach(e =>
                 {
-                    var curItems = items.Where(w => w.OmsOrderId == e.Id).OrderByDescending(o => o.Id).ToList();
+                    var curItems = items.Where(w => w.OmsOrderId == e.OrderId).OrderByDescending(o => o.Id).ToList();
                     if (curItems.Count > 0)
-                        e.OmsOrderItems.AddRange(curItems);
+                        e.Items.AddRange(curItems);
                 });
             }
             return new PageList<OmsOrderAggr>(data.Total, data.PageIndex, data.PageSize, result);

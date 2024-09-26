@@ -51,9 +51,14 @@ namespace Oms.HttpService.Models
         public string WxmpOrder { get; set; } = "WxmpOrder";
 
         /// <summary>
+        /// 微信商户证书
+        /// </summary>
+        public string WxPayCert { get; set; } = "WxPayCert";
+
+        /// <summary>
         /// 定时任务调度中心
         /// </summary>
         public string ScheduleJob { get; set; } = "ScheduleJob";
-        
+
     }
 }

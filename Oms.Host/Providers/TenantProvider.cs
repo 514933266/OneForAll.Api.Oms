@@ -25,7 +25,7 @@ namespace Oms.Host
             }
             else
             {
-                return Guid.Empty; ;
+                return Guid.Empty;
             }
         }
     }

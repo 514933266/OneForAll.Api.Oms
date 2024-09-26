@@ -38,6 +38,14 @@ namespace Oms.HttpService.Models
         public string Description { get; set; }
 
         /// <summary>
+        /// 商户系统内部订单号，只能是数字、大小写字母_-*且在同一个商户号下唯一
+        /// </summary>
+        [Required]
+        [JsonProperty("out_trade_no")]
+        [StringLength(32)]
+        public string OutTradeNo { get; set; }
+
+        /// <summary>
         /// 订单失效时间：2015-05-20T13:29:35+08:00
         /// </summary>
         [Required]
@@ -59,7 +67,7 @@ namespace Oms.HttpService.Models
         [Required]
         [JsonProperty("notify_url")]
         [StringLength(300)]
-        public string NotifyUrl { get; set; }
+        public string WxmpNotifyUrl { get; set; }
 
         /// <summary>
         /// 订单优惠标记
@@ -67,15 +75,14 @@ namespace Oms.HttpService.Models
         [Required]
         [JsonProperty("goods_tag")]
         [StringLength(32)]
-        public string GoodsTag { get; set; }
+        public string GoodsTag { get; set; } = "";
 
         /// <summary>
         /// 电子发票入口开放标识，传入true时，支付成功消息和支付详情页将出现开票入口
         /// </summary>
         [Required]
         [JsonProperty("support_fapiao")]
-        [StringLength(32)]
-        public string SupportFapiao { get; set; }
+        public bool SupportFapiao { get; set; }
 
         /// <summary>
         /// 订单金额信息

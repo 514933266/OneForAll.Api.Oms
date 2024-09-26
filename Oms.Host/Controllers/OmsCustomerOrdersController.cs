@@ -16,12 +16,12 @@ namespace Oms.Host.Controllers
     /// <summary>
     /// 用户订单
     /// </summary>
-    [Route("api/[controller]")]
+    [Route("open-api/[controller]")]
     public class OmsCustomerOrdersController : BaseController
     {
-        private readonly IOmsPersonalOrderService _service;
+        private readonly IOmsCustomerOrderService _service;
 
-        public OmsCustomerOrdersController(IOmsPersonalOrderService service)
+        public OmsCustomerOrdersController(IOmsCustomerOrderService service)
         {
             _service = service;
         }
@@ -36,6 +36,17 @@ namespace Oms.Host.Controllers
         public async Task<OmsOrderDto> GetAsync(Guid orderId)
         {
             return await _service.GetAsync(orderId);
+        }
+
+        /// <summary>
+        /// 查询订单列表
+        /// </summary>
+        /// <param name="orderNos">订单编号</param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IEnumerable<OmsOrderDto>> GetListAsync([FromQuery] List<string> orderNos)
+        {
+            return await _service.GetListAsync(orderNos);
         }
 
         /// <summary>

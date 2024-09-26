@@ -62,9 +62,30 @@ namespace Oms.Domain
             var result = _mapper.Map<OmsOrderAggr>(data);
             if (items.Any())
             {
-                result.OmsOrderItems.AddRange(items);
+                result.Items.AddRange(items);
             }
             return result;
+        }
+
+        /// <summary>
+        /// 查询订单列表
+        /// </summary>
+        /// <param name="orderNos">订单编号</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<OmsOrderAggr>> GetListAsync(List<string> orderNos)
+        {
+            var data = await _repository.GetListAsync(orderNos);
+            var oids = data.Select(s => s.Id).ToList();
+            var items = await _itemRepository.GetListAsync(w => oids.Contains(w.OmsOrderId));
+
+            var orders = _mapper.Map<IEnumerable<OmsOrderAggr>>(data);
+            orders.ForEach(e =>
+            {
+                var cItem = items.Where(w => w.OmsOrderId == e.OrderId).ToList();
+                if (items.Any())
+                    e.Items.AddRange(cItem);
+            });
+            return orders;
         }
 
         /// <summary>
@@ -88,11 +109,9 @@ namespace Oms.Domain
             var result = new PageList<OmsOrderAggr>(data.Total, data.PageIndex, data.PageSize, orders);
             result.Items.ForEach(e =>
             {
-                var cItem = items.Where(w => w.OmsOrderId == e.Id).ToList();
+                var cItem = items.Where(w => w.OmsOrderId == e.OrderId).ToList();
                 if (items.Any())
-                {
-                    e.OmsOrderItems.AddRange(cItem);
-                }
+                    e.Items.AddRange(cItem);
             });
             return result;
         }
@@ -137,7 +156,9 @@ namespace Oms.Domain
             }
             else
             {
-                var cacheKey = CACHE_KEY.Fmt($"{LoginUser.Id}{form.ProductName}".ToMd5());
+                var names = form.Items.Select(s => s.ProductNo).ToList();
+                var nameStr = string.Join("-", names);
+                var cacheKey = CACHE_KEY.Fmt($"{LoginUser.Id}{nameStr}".ToMd5());
                 var cacheNo = await _cacheRepository.GetStringAsync(cacheKey);
                 if (!cacheNo.IsNullOrEmpty())
                 {
@@ -162,8 +183,8 @@ namespace Oms.Domain
         {
             var data = _mapper.Map<OmsOrderForm, OmsOrder>(form);
             data.UserId = LoginUser.Id.ToString();
-            data.UserName = LoginUser.UserName;
-            data.PlatformPayerId = LoginUser.WxOpenId;
+            data.UserName = LoginUser.UserName ?? "";
+            data.PlatformPayerId = LoginUser.WxOpenId ?? "";
             data.CreateOrderNo();
 
             if (timeExpire > 0)

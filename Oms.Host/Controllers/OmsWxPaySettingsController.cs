@@ -7,6 +7,7 @@ using Oms.Domain.Models;
 using Oms.Host.Filters;
 using Oms.Public.Models;
 using OneForAll.Core;
+using OneForAll.Core.OAuth;
 using OneForAll.Core.Upload;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,7 @@ namespace Oms.Host.Controllers
         /// <returns>用户列表</returns>
         [HttpGet]
         [Route("{pageIndex}/{pageSize}")]
+        [CheckPermission(Action = ConstPermission.EnterView)]
         public async Task<PageList<OmsWxPaySettingDto>> GetListAsync(int pageIndex, int pageSize, [FromQuery] string key)
         {
             return await _service.GetPageAsync(pageIndex, pageSize, key);
@@ -47,6 +49,7 @@ namespace Oms.Host.Controllers
         /// <param name="form">表单</param>
         /// <returns>结果</returns>
         [HttpPost]
+        [CheckPermission(Action = ConstPermission.EnterView)]
         public async Task<BaseMessage> AddAsync([FromBody] OmsWxPaySettingForm form)
         {
             var msg = new BaseMessage();
@@ -66,6 +69,7 @@ namespace Oms.Host.Controllers
         /// <param name="entity">表单</param>
         /// <returns>结果</returns>
         [HttpPut]
+        [CheckPermission(Action = ConstPermission.EnterView)]
         public async Task<BaseMessage> UpdateAsync([FromBody] OmsWxPaySettingForm entity)
         {
             var msg = new BaseMessage();
@@ -86,6 +90,7 @@ namespace Oms.Host.Controllers
         /// <returns>消息</returns>
         [HttpPatch]
         [Route("Batch/IsDeleted")]
+        [CheckPermission(Action = ConstPermission.EnterView)]
         public async Task<BaseMessage> DeleteAsync([FromBody] IEnumerable<Guid> ids)
         {
             var msg = new BaseMessage();
@@ -104,6 +109,7 @@ namespace Oms.Host.Controllers
         /// </summary>
         [HttpPost]
         [Route("{id}/Certificates")]
+        [CheckPermission(Action = ConstPermission.EnterView)]
         public async Task<BaseMessage> UploadCertificateAsync(Guid id, [FromForm] IFormCollection form)
         {
             var msg = new BaseMessage();

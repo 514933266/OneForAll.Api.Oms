@@ -9,7 +9,7 @@ namespace Oms.HttpService.Models
     /// <summary>
     /// 权限验证模型
     /// </summary>
-    public class SysPermissionCheck
+    public class PermissionCheckRequest
     {
         /// <summary>
         /// 租户id

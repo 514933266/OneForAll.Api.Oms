@@ -30,6 +30,13 @@ namespace Oms.Application.Interfaces
         Task<OmsOrderDto> GetAsync(Guid orderId);
 
         /// <summary>
+        /// 查询订单列表
+        /// </summary>
+        /// <param name="orderNos">订单编号</param>
+        /// <returns></returns>
+        Task<IEnumerable<OmsOrderDto>> GetListAsync(List<string> orderNos);
+
+        /// <summary>
         /// 获取分页列表
         /// </summary>
         /// <param name="pageIndex">页码</param>

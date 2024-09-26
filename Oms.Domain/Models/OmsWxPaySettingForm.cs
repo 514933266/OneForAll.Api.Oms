@@ -53,7 +53,6 @@ namespace Oms.Domain.Models
         /// <summary>
         /// 回调地址，如有会将订单基本信息回传
         /// </summary>
-        [Required]
         [StringLength(300)]
         public string CallbackUrl { get; set; }
     }

@@ -25,22 +25,23 @@ namespace Oms.Host.QuartzJobs
     {
         private readonly AuthConfig _config;
         private readonly IOmsOrderLogManager _logManager;
+        private readonly IOmsOrderCallbackRecordManager _cbManager;
+
         private readonly IOmsOrderRepository _repository;
-        private readonly IOmsOrderCallbackRecordRepository _recordRepository;
         private readonly IScheduleJobHttpService _jobHttpService;
         private readonly ISysGlobalExceptionLogHttpService _logHttpService;
         public MonitorOrderCancelJob(
             AuthConfig config,
             IOmsOrderLogManager logManager,
+            IOmsOrderCallbackRecordManager cbManager,
             IOmsOrderRepository repository,
-            IOmsOrderCallbackRecordRepository recordRepository,
             IScheduleJobHttpService jobHttpService,
             ISysGlobalExceptionLogHttpService logHttpService)
         {
             _config = config;
             _logManager = logManager;
+            _cbManager = cbManager;
             _repository = repository;
-            _recordRepository = recordRepository;
             _jobHttpService = jobHttpService;
             _logHttpService = logHttpService;
         }
@@ -67,7 +68,8 @@ namespace Oms.Host.QuartzJobs
                                 OrderId = e.Id,
                                 PayState = e.PayState,
                                 State = e.State,
-                                ShippingState = e.ShippingState
+                                ShippingState = e.ShippingState,
+                                Remark = "订单超时取消"
                             });
                         }
                     });
@@ -90,12 +92,9 @@ namespace Oms.Host.QuartzJobs
         {
             if (orderIds.Any())
             {
-                var records = await _recordRepository.GetListAsync(w => orderIds.Contains(w.OmsOrderId));
-                records.ForEach(e =>
+                orderIds.ForEach(async orderId =>
                 {
-                    e.IsSuccess = true;
-                    e.SuccessTime = DateTime.Now;
-                    e.Error = "订单超时取消";
+                    await _cbManager.SynOrderAsync(orderId);
                 });
             }
         }

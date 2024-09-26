@@ -17,14 +17,14 @@ namespace Oms.Application
     /// <summary>
     /// 个人订单
     /// </summary>
-    public class OmsCustomerOrderService : IOmsPersonalOrderService
+    public class OmsCustomerOrderService : IOmsCustomerOrderService
     {
         private readonly IMapper _mapper;
-        private readonly IOmsPersonalOrderManager _manager;
+        private readonly IOmsCustomerOrderManager _manager;
 
         public OmsCustomerOrderService(
             IMapper mapper,
-            IOmsPersonalOrderManager manager)
+            IOmsCustomerOrderManager manager)
         {
             _mapper = mapper;
             _manager = manager;
@@ -39,6 +39,17 @@ namespace Oms.Application
         {
             var order = await _manager.GetAsync(orderId);
             return _mapper.Map<OmsOrderDto>(order);
+        }
+
+        /// <summary>
+        /// 查询订单列表
+        /// </summary>
+        /// <param name="orderNos">订单编号</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<OmsOrderDto>> GetListAsync(List<string> orderNos)
+        {
+            var data = await _manager.GetListAsync(orderNos);
+            return _mapper.Map<IEnumerable<OmsOrderAggr>, IEnumerable<OmsOrderDto>>(data);
         }
 
         /// <summary>
